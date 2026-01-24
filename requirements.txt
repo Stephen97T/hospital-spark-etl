@@ -1,0 +1,19 @@
+# core
+pyspark>=3.5.0
+flask>=3.0.0
+google-cloud-storage>=2.14.0
+
+# handle files&data
+kagglehub>=0.4.0
+pandas>=2.1.0
+openpyxl>=3.1.2
+
+# quality&testing
+pytest>=7.4.0
+pytest-spark>=0.6.0
+flake8>=6.1.0
+mypy>=1.6.0
+black>=23.10.0
+
+# type stubs
+types-Flask>=1.1.6
