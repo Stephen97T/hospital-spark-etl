@@ -38,6 +38,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the project folders
 COPY src/ ./src/
+COPY main.py .
 # Note: We don't copy the 'data' folder because we want
 # Cloud Run to pull fresh data or use Cloud Storage.
 
@@ -47,4 +48,4 @@ ENV PYSPARK_DRIVER_PYTHON=python3
 
 # Cloud Run listens on a specific port, though Spark jobs are usually batch.
 # We'll run the main script.
-CMD ["python", "./src/main.py"]
+CMD ["python", "main.py"]
