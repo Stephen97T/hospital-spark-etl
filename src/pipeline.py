@@ -2,8 +2,8 @@ import logging
 
 from pyspark.sql import SparkSession, functions as F
 
-from gcp_utils import upload_local_to_gcs
 from src.cleanse_data import clean_columns_names, apply_feature_engineering
+from src.gcp_utils import upload_local_to_gcs
 from src.kaggle_data import download_and_move_data, prepare_hospital_data
 
 logger = logging.getLogger(__name__)

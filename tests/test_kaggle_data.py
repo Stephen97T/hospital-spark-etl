@@ -1,7 +1,9 @@
 import os
 from unittest.mock import patch
 
-from src.kaggle_data import download_and_move_data
+import pandas as pd
+
+from src.kaggle_data import download_and_move_data, prepare_hospital_data
 
 
 @patch("src.kaggle_data.kagglehub.dataset_download")
@@ -11,7 +13,7 @@ from src.kaggle_data import download_and_move_data
 @patch("src.kaggle_data.shutil.copy")
 def test_download_and_move_data_success(
     mock_copy, mock_listdir, mock_makedirs, mock_exists, mock_download
-):
+) -> None:
     # 1. ARRANGE: Set up our fake environment
     mock_download.return_value = "/fake/cache/path"
     mock_exists.return_value = False  # Pretend the 'data' folder doesn't exist yet
@@ -35,3 +37,26 @@ def test_download_and_move_data_success(
     expected_source = os.path.join("/fake/cache/path", "file1.xlsx")
     expected_dest = os.path.join("data", "file1.xlsx")
     mock_copy.assert_any_call(expected_source, expected_dest)
+
+
+@patch("src.kaggle_data.os.path.exists")
+@patch("src.kaggle_data.pd.read_excel")
+@patch("src.kaggle_data.pd.DataFrame.to_csv")
+def test_prepare_hospital_data(mock_to_csv, mock_read_excel, mock_exists) -> None:
+    # 1. ARRANGE: Set up mock behavior
+    excel_path = "data/hospital-dataset.xlsx"
+    csv_path = "data/hospital-dataset.csv"
+
+    # Mock file existence checks
+    mock_exists.side_effect = lambda path: path == excel_path
+
+    # Mock pandas read_excel and to_csv
+    mock_read_excel.return_value = pd.DataFrame({"col1": [1, 2], "col2": [3, 4]})
+
+    # 2. ACT: Call the function
+    result = prepare_hospital_data(excel_path)
+
+    # 3. ASSERT: Verify behavior
+    assert result == csv_path  # Ensure the correct CSV path is returned
+    mock_read_excel.assert_called_once_with(excel_path)  # Ensure Excel was read
+    mock_to_csv.assert_called_once_with(csv_path, index=False)  # Ensure CSV was written

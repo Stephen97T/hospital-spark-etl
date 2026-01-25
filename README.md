@@ -30,7 +30,13 @@ environment configurations.
     * **Env Var**: Create a system variable `HADOOP_HOME` pointing to `C:\hadoop`.
     * **Path**: Add `%HADOOP_HOME%\bin` to your System `Path`.
 
-### 3. Kaggle API Authentication
+### 3. Kaggle API Data & Authentication
+
+#### Data Source
+
+[Hospital Data](https://www.kaggle.com/datasets/t0ut0u/hospital-excel-dataset?resource=download)
+
+#### Authentication
 
 1. Generate a `kaggle.json` from your [Kaggle Account Settings](https://www.kaggle.com/settings).
 2. Set the following Environment Variables on your machine:
