@@ -1,10 +1,10 @@
 import os
 import sys
 
-import pandas as pd
 from pyspark.sql import SparkSession
 
 from src.cleanse_data import clean_columns_names
+from src.kaggle_data import download_and_move_data, prepare_hospital_data
 
 # Tell Spark to use the exact same python executable as your current environment
 os.environ["PYSPARK_PYTHON"] = sys.executable
@@ -21,14 +21,10 @@ spark = (
     .getOrCreate()
 )
 
-# Verify the paths Spark is seeing
-print(f"Python Executable: {sys.executable}")
-print(f"Spark Version: {spark.version}")
-
-df = pd.read_excel("data/hospital-dataset.xlsx")
-sdf = spark.createDataFrame(df)
-sdf = clean_columns_names(sdf)
-sdf.count()
+download_and_move_data()
+path_hospital = prepare_hospital_data()
+sdf = spark.read.csv(path_hospital, header=True, inferSchema=True)
+sdf_cleaned = clean_columns_names(sdf)
 
 
 def main() -> None:
