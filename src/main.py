@@ -1,10 +1,18 @@
+import logging
 import os
 import sys
 
-from pyspark.sql import SparkSession, functions as F
+from pyspark.sql import SparkSession
 
-from src.cleanse_data import clean_columns_names
-from src.kaggle_data import download_and_move_data, prepare_hospital_data
+from pipeline import run_pipeline
+
+# Configure logging to show the level and message
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+logger = logging.getLogger(__name__)
+
+# Environment Toggle
+ENV_STATE = os.getenv("ENV_STATE", "dev").lower()
+BUCKET_NAME = os.getenv("GCS_BUCKET_NAME", "")
 
 # Tell Spark to use the exact same python executable as your current environment
 os.environ["PYSPARK_PYTHON"] = sys.executable
@@ -25,40 +33,8 @@ spark = (
     .getOrCreate()
 )
 
-
-def run_pipeline():
-    # 1. Ingestion
-    download_and_move_data()
-    path_hospital = prepare_hospital_data()
-    sdf_bronze = spark.read.csv(path_hospital, header=True, inferSchema=True)
-
-    # 2. Basic Cleaning
-    sdf_silver = clean_columns_names(sdf_bronze)
-
-    # 3. Feature Engineering
-    # Calculate stay duration, normalize names, and create a high-billing flag
-    sdf_gold = (
-        sdf_silver.withColumn("name", F.initcap(F.lower(F.col("name"))))
-        .withColumn("stay_duration", F.datediff("discharge_date", "date_of_admission"))
-        .withColumn(
-            "is_high_bill",
-            F.when(F.col("billing_amount") > 30000, True).otherwise(False),
-        )
-    )
-
-    # 4. Data Quality Check (Filter out impossible dates if any)
-    valid_data = sdf_gold.filter(F.col("stay_duration") >= 0)
-
-    # 5. Optimized Export (Parquet)
-    # This creates a folder structure: output/gold_hospital_data/medical_condition=Asthma/...
-    output_path = "data/gold_hospital_data"
-    valid_data.write.mode("overwrite").partitionBy("medical_condition").parquet(
-        output_path
-    )
-
-    print(f"Pipeline complete. Gold data saved to: {output_path}")
-
-
 if __name__ == "__main__":
-    run_pipeline()
+    logger.info("Starting Hospital ETL Pipeline...")
+    run_pipeline(spark, ENV_STATE, BUCKET_NAME)
     spark.stop()
+    logger.info("Finished Hospital ETL Pipeline")
