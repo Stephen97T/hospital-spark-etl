@@ -11,8 +11,19 @@ os.environ["PYSPARK_PYTHON"] = sys.executable
 os.environ["PYSPARK_DRIVER_PYTHON"] = sys.executable
 os.environ["PYSPARK_GATEWAY_SECRET"] = "1"
 
-spark = SparkSession.builder.appName("HospitalETL").master("local[*]").getOrCreate()
-spark.sparkContext.setLogLevel("ERROR")
+spark = (
+    SparkSession.builder.appName("DebugHospital")
+    .master("local[1]")
+    .config("spark.driver.host", "127.0.0.1")
+    .config("spark.driver.bindAddress", "127.0.0.1")
+    .config("spark.sql.execution.pyspark.udf.faulthandler.enabled", "true")
+    .config("spark.python.worker.reuse", "false")
+    .getOrCreate()
+)
+
+# Verify the paths Spark is seeing
+print(f"Python Executable: {sys.executable}")
+print(f"Spark Version: {spark.version}")
 
 df = pd.read_excel("data/hospital-dataset.xlsx")
 sdf = spark.createDataFrame(df)

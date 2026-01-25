@@ -1,13 +1,17 @@
 # core
 pyspark==3.5.0
 py4j==0.10.9.7
+setuptools==69.0.3    # CRITICAL for Python 3.12 compatibility
 flask==3.0.2
 google-cloud-storage>=2.14.0
-numpy==1.26.4
 
 # handle files&data
 kagglehub==0.4.0
+numpy==1.26.4
 pandas==2.1.4
+pytz==2024.1            # Added for Pandas stability
+python-dateutil==2.9.0  # Added for Pandas stability
+six==1.16.0           # Added to fix the dateutil dependency
 openpyxl==3.1.2
 
 # quality&testing
