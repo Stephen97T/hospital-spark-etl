@@ -4,7 +4,7 @@ import shutil
 import kagglehub
 
 
-def download_and_move_data():
+def download_and_move_data() -> None:
     # 1. Download latest version (returns the cache path)
     print("Downloading dataset from Kaggle...")
     cache_path = kagglehub.dataset_download("t0ut0u/hospital-excel-dataset")

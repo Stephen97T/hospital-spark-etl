@@ -20,7 +20,7 @@ sdf = clean_columns_names(sdf)
 sdf.count()
 
 
-def main():
+def main() -> None:
     pass
 
 

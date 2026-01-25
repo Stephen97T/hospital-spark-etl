@@ -1,3 +1,6 @@
+import pyspark
+
+
 def clean_columns_names(sdf: "pyspark.sql.DataFrame") -> "pyspark.sql.DataFrame":
     """Cleanse the column names of a Spark DataFrame by converting them to lowercase
     and replacing spaces with underscores.

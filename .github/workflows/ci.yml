@@ -20,7 +20,7 @@ jobs:
           pip install flake8 mypy pytest
 
       - name: Lint with flake8
-        run: flake8 .
+        run: flake8 src tests
 
       - name: Type check with mypy
         run: mypy src/
