@@ -71,12 +71,18 @@ docker run -it --rm hospital_etl_test /bin/bash
 
 ### Google Cloud Deployment (Free Tier)
 
-This pipeline is optimized for the Google Cloud Free Tier, utilizing Cloud Run Jobs to ensure $0.00 operating costs.1.
-Infrastructure SetupGCS Bucket: Create a bucket in us-central1. Set a Lifecycle Rule to delete objects after 7 days to
+This pipeline is optimized for the Google Cloud Free Tier, utilizing Cloud Run Jobs to ensure $0.00 operating costs.
+
+#### 1. Infrastructure SetupGCS Bucket:
+
+Create a bucket in us-central1. Set a Lifecycle Rule to delete objects after 7 days to
 avoid storage fees.Artifact Registry: Create a Docker repository for your images.IAM: Grant the Storage Object Admin
-role to your Cloud Run Service Account.2. Deployment CommandsBash# Tag and Push the image
+role to your Cloud Run Service Account.
+
+#### 2. Deployment Commands Bash
 
 ```bash
+# Tag and Push the image
 docker tag hospital_etl_test us-central1-docker.pkg.dev/[PROJECT_ID]/hospital-repo/etl-pipeline:v1
 docker push us-central1-docker.pkg.dev/[PROJECT_ID]/hospital-repo/etl-pipeline:v1
 ```
