@@ -32,7 +32,7 @@ def test_clean_columns_names_logic() -> None:
 
 
 @patch("src.cleanse_data.F")
-def test_apply_feature_engineering_sparkless(mock_f) -> None:
+def test_apply_feature_engineering_sparkless(mock_f: MagicMock) -> None:
     """
     Verifies the transformation logic without triggering any JVM/Spark calls,
     handling operators like '>' correctly.

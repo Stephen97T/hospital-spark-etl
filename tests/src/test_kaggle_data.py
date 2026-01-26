@@ -1,5 +1,5 @@
 import os
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import pandas as pd
 
@@ -12,7 +12,11 @@ from src.kaggle_data import download_and_move_data, prepare_hospital_data
 @patch("src.kaggle_data.os.listdir")
 @patch("src.kaggle_data.shutil.copy")
 def test_download_and_move_data_success(
-    mock_copy, mock_listdir, mock_makedirs, mock_exists, mock_download
+    mock_copy: MagicMock,
+    mock_listdir: MagicMock,
+    mock_makedirs: MagicMock,
+    mock_exists: MagicMock,
+    mock_download: MagicMock,
 ) -> None:
     # 1. ARRANGE: Set up our fake environment
     mock_download.return_value = "/fake/cache/path"
@@ -42,7 +46,9 @@ def test_download_and_move_data_success(
 @patch("src.kaggle_data.os.path.exists")
 @patch("src.kaggle_data.pd.read_excel")
 @patch("src.kaggle_data.pd.DataFrame.to_csv")
-def test_prepare_hospital_data(mock_to_csv, mock_read_excel, mock_exists) -> None:
+def test_prepare_hospital_data(
+    mock_to_csv: MagicMock, mock_read_excel: MagicMock, mock_exists: MagicMock
+) -> None:
     # 1. ARRANGE: Set up mock behavior
     excel_path = "data/hospital-dataset.xlsx"
     csv_path = "data/hospital-dataset.csv"

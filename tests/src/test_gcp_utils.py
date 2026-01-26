@@ -1,11 +1,12 @@
 import os
+from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 from src.gcp_utils import upload_local_to_gcs
 
 
 @patch("src.gcp_utils.storage.Client")
-def test_upload_local_to_gcs(mock_storage_client, tmp_path) -> None:
+def test_upload_local_to_gcs(mock_storage_client: MagicMock, tmp_path: Path) -> None:
     """
     Verifies that the upload function:
     1. Walks the local directory

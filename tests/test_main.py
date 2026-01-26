@@ -14,7 +14,7 @@ def test_main_orchestration() -> None:
     with patch("main.run_pipeline") as mocked_pipeline:
 
         # We also mock spark.stop() so we can inspect the session before it dies
-        with patch.object(SparkSession, "stop") as mocked_stop:
+        with patch.object(SparkSession, "stop"):
 
             # Execute the main function
             main.main()

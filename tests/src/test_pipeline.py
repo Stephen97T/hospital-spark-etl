@@ -1,13 +1,14 @@
 from unittest.mock import patch, MagicMock, PropertyMock
 
+from pyspark.sql import SparkSession
+
 from src.pipeline import run_pipeline
 
 
 @patch("src.pipeline.download_and_move_data")
-@patch("src.pipeline.prepare_hospital_data")
 @patch("src.pipeline.upload_local_to_gcs")
 def test_run_pipeline_flow_dev(
-    mock_upload, mock_prepare, mock_download, spark_session
+    mock_upload: MagicMock, mock_download: MagicMock, spark_session: SparkSession
 ) -> None:
     # 1. Setup - Create a real DF to be returned by our mock
     df_input = spark_session.createDataFrame(
@@ -52,10 +53,11 @@ def test_run_pipeline_flow_dev(
 
 
 @patch("src.pipeline.download_and_move_data")
-@patch("src.pipeline.prepare_hospital_data")
 @patch("src.pipeline.upload_local_to_gcs")
 def test_run_pipeline_flow_prod(
-    mock_upload, mock_prepare, mock_download, spark_session
+    mock_upload: MagicMock,
+    mock_download: MagicMock,
+    spark_session: SparkSession,
 ) -> None:
     df_input = spark_session.createDataFrame(
         [("Alice", "2023-01-01", "2023-01-05", 100, "Flu")],
