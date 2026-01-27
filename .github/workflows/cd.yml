@@ -1,0 +1,45 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: us-central1
+  REPO_NAME: hospital-repo
+  IMAGE_NAME: etl-pipeline
+  JOB_NAME: hospital-etl-job
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Google Auth
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Authorize Docker
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev
+
+      - name: Build and Push Container
+        run: |
+          docker build -t us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+          docker push us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Deploy to Cloud Run Job
+        run: |
+          gcloud run jobs deploy ${{ env.JOB_NAME }} \
+            --image us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --region ${{ env.REGION }} \
+            --memory 2Gi \
+            --set-env-vars ENV_STATE=prod,GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }} \
+            --max-retries 0

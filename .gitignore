@@ -10,6 +10,7 @@ __pycache__/
 *.xlsx
 data/
 *.csv
+*.xml
 
 # Distribution / packaging
 .Python

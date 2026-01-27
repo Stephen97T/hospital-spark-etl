@@ -38,6 +38,8 @@ environment configurations.
 
 #### Authentication
 
+Authentication is not neccesary for this dataset, but if needed you can authenticate for kaggle using the following:
+
 1. Generate a `kaggle.json` from your [Kaggle Account Settings](https://www.kaggle.com/settings).
 2. Set the following Environment Variables on your machine:
     * `KAGGLE_USERNAME`: Your Kaggle username.
@@ -72,36 +74,133 @@ docker-compose build
 docker-compose up
 
 # Access the container shell for debugging
-docker run -it --rm hospital_etl_test /bin/bash
+docker run -it --rm <img_name> /bin/bash
 ```
 
 ### Google Cloud Deployment (Free Tier)
 
-This pipeline is optimized for the Google Cloud Free Tier, utilizing Cloud Run Jobs to ensure $0.00 operating costs.
+Make sure to create a new project in GCP and enable billing (Free Tier should suffice).
 
-#### 1. Infrastructure SetupGCS Bucket:
+#### Phase 1: Local Terminal Preparation
 
-Create a bucket in us-central1. Set a Lifecycle Rule to delete objects after 7 days to
-avoid storage fees.Artifact Registry: Create a Docker repository for your images.IAM: Grant the Storage Object Admin
-role to your Cloud Run Service Account.
+Before touching the Cloud Console, you must authenticate your local machine and prepare the container.
 
-#### 2. Deployment Commands Bash
+1. **Authenticate GCloud & Docker**
 
-```bash
-# Tag and Push the image
-docker tag hospital_etl_test us-central1-docker.pkg.dev/[PROJECT_ID]/hospital-repo/etl-pipeline:v1
-docker push us-central1-docker.pkg.dev/[PROJECT_ID]/hospital-repo/etl-pipeline:v1
-```
+   Run these commands in your local terminal (PowerShell/CMD/Zsh) to give your computer permission to talk to your GCP
+   project:
 
-### Deploy as a Cloud Run Job
+   ```bash
+   # Log in to your Google Account (opens a browser tab)
+   gcloud auth login
 
-```bash
-gcloud run jobs deploy hospital-etl-job \
---image us-central1-docker.pkg.dev/[PROJECT_ID]/hospital-repo/etl-pipeline:v1 \
---region us-central1 \
---set-env-vars ENV_STATE=prod,GCS_BUCKET_NAME=[YOUR_BUCKET_NAME] \
---memory 2Gi
-```
+   # Set your active project
+   gcloud config set project [YOUR_PROJECT_ID]
+
+   # Authenticate Docker to push to Google's Registry
+   gcloud auth configure-docker us-central1-docker.pkg.dev
+   ```
+
+2. **Build and Tag your Image**
+
+   Use the existing `docker-compose.yml` to build. The image can be tagged, but in our case it is not necessary since we
+   will
+   push directly to the Artifact Registry, using the image name from the docker-compose (already an url).
+
+   ```bash
+   # Build using your local configuration
+   docker compose build
+
+   # Tag the image for Google Artifact Registry
+   # Format: [LOCATION]-docker.pkg.dev/[PROJECT_ID]/[REPO_NAME]/[IMAGE_NAME]:[TAG]
+   docker tag hospital-spark-etl-app us-central1-docker.pkg.dev/[PROJECT_ID]/hospital-repo/etl-pipeline:v1
+
+   # Push the image to the cloud
+   docker push us-central1-docker.pkg.dev/[PROJECT_ID]/hospital-repo/etl-pipeline:v1
+   ```
+
+#### Phase 2: Google Cloud Console (UI) Setup
+
+Once the image is pushed, configure the cloud resources using the Console Interface.
+
+1. **Create the Storage Bucket (The "Gold" Zone)**
+    - **Search**: In the top search bar, type `Buckets` and select Cloud Storage.
+    - **Create**: Click `[+] CREATE`.
+    - **Name**: Enter a globally unique name (e.g., `hospital-data-gold-123`).
+    - **Location**: Select Region and choose `us-central1 (Iowa)`.
+    - **Storage Class**: Keep as Standard.
+    - **Access Control**: Ensure Uniform is selected.
+    - **Finalize**: Click `CREATE`.
+
+2. **Create the Artifact Registry**
+    - **Search**: Type `Artifact Registry`.
+    - **Create**: Click `[+] CREATE REPOSITORY`.
+    - **Name**: `hospital-repo`.
+    - **Format**: Docker.
+    - **Location Type**: Region → `us-central1`.
+    - **Finalize**: Click `CREATE`. (This matches the path used in the docker tag command.)
+
+3. **Create and Execute the Cloud Run Job**
+    - **Search**: Type `Cloud Run` and click `Jobs` in the left sidebar.
+    - **Create**: Click `[+] CREATE JOB`.
+    - **Container Image URL**: Click `SELECT` and find the image you pushed (`v1`).
+    - **Region**: `us-central1`.
+    - **Settings** (Expansion Panel):
+        - **Capacity**: Set memory to `2 GiB` (required for Spark).
+        - **Variables**: Add the env variable `GCS_BUCKET_NAME` (bucket name).
+    - **Finalize**: Click `CREATE`.
+    - **Run**: Once created, click `EXECUTE` to start the pipeline.
+
+#### Phase 2: Provisioning Infrastructure (CLI Version)
+
+Instead of clicking through the UI, run these commands to create your resources.
+
+1. **Enable Required APIs**
+
+   ```bash
+   gcloud services enable \
+       artifactregistry.googleapis.com \
+       run.googleapis.com \
+       storage.googleapis.com
+   ```
+
+2. **Create Artifact Registry & Push Image**
+
+   ```bash
+   # Create the repository (UI: Artifact Registry > Create)
+   gcloud artifacts repositories create hospital-repo \
+       --repository-format=docker \
+       --location=us-central1
+
+   # Push the image (UI: Upload/Push)
+   docker push us-central1-docker.pkg.dev/[YOUR_PROJECT_ID]/hospital-repo/etl-pipeline:v1
+   ```
+
+3. **Create the Storage Bucket**
+
+   ```bash
+   # Create the bucket (UI: Cloud Storage > Create Bucket)
+   # Use 'Standard' storage and 'Uniform' access
+   gcloud storage buckets create gs://[YOUR_BUCKET_NAME] \
+       --location=us-central1 \
+       --uniform-bucket-level-access
+   ```
+
+4. **Create and Execute the Cloud Run Job**
+
+   ```bash
+   # Create the Job (UI: Cloud Run > Jobs > Create Job)
+   gcloud run jobs create hospital-etl-job \
+       --image us-central1-docker.pkg.dev/[YOUR_PROJECT_ID]/hospital-repo/etl-pipeline:v1 \
+       --region us-central1 \
+       --memory 2Gi \
+       --set-env-vars GCS_BUCKET_NAME=[YOUR_BUCKET_NAME],KAGGLE_USERNAME=[USER],KAGGLE_KEY=[KEY]
+
+   # Execute the Job (UI: Click 'Execute')
+   gcloud run jobs execute hospital-etl-job --region us-central1
+   ```
+
+---
 
 ### Troubleshooting Summary
 
@@ -109,6 +208,5 @@ gcloud run jobs deploy hospital-etl-job \
 * winutils.exe ErrorMissing Hadoop binaries on WindowsSet HADOOP_HOME and add /bin to
   Path.
 * Py4JNetworkErrorPython 3.12+ incompatibilityDowngrade to Python 3.11.401
-* UnauthorizedMissing Kaggle CredentialsPass KAGGLE_USERNAME/KEY via Env Vars.
 
 ---

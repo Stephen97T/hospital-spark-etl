@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     # Format: [REGION]-docker.pkg.dev/[PROJECT_ID]/[REPOSITORY]/[IMAGE_NAME]:[TAG]
-    image: us-central1-docker.pkg.dev/your-project-id/hospital-repo/etl-pipeline:latest
+    image: us-central1-docker.pkg.dev/hospital-etl-project/hospital-repo/etl-pipeline:latest
 
     container_name: hospital_etl_test
 
