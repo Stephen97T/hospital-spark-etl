@@ -41,5 +41,6 @@ def test_spark_session_creation() -> None:
         spark = SparkSession.builder.getOrCreate()
 
         # Check specific configs from your main.py
-        assert spark.conf.get("spark.sql.shuffle.partitions") == "1"
-        assert spark.conf.get("spark.driver.host") == "MSI"
+        assert spark.conf.get("spark.sql.shuffle.partitions") == "4"
+        assert spark.conf.get("spark.driver.host") == "127.0.0.1"
+        spark.stop()
