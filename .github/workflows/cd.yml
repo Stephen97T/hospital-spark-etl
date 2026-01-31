@@ -5,15 +5,24 @@ on:
     branches: [ "main" ]
 
 env:
-  PROJECT_ID: ${{ env.GCP_PROJECT_ID }}
-  REGION: us-central1
-  REPO_NAME: hospital-repo
-  IMAGE_NAME: etl-pipeline
-  JOB_NAME: hospital-etl-job
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  REGION: ${{ vars.GCP_REGION }}
+  REPO_NAME: ${{ vars.GCP_REPO_NAME }}
+  IMAGE_NAME: ${{ vars.GCP_IMAGE_NAME }}
+  BUCKET_NAME: ${{ vars.GCP_BUCKET_NAME }}
+  JOB_NAME: ${{ vars.GCP_JOB_NAME }}
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -26,14 +35,16 @@ jobs:
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
 
       - name: Authorize Docker
         run: gcloud auth configure-docker us-central1-docker.pkg.dev
 
       - name: Build and Push Container
         run: |
-          docker build -t us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
-          docker push us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker build -t us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+          docker push us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
       - name: Deploy to Cloud Run Job
         run: |
@@ -41,5 +52,5 @@ jobs:
             --image us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
             --region ${{ env.REGION }} \
             --memory 2Gi \
-            --set-env-vars ENV_STATE=prod,GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }} \
+            --set-env-vars ENV_STATE=prod,GCS_BUCKET_NAME=${{ env.BUCKET_NAME }} \
             --max-retries 0
