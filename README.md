@@ -249,7 +249,11 @@ Where to add the secret:
 
 - GitHub → Settings → Secrets and variables → Actions → Secrets → New repository secret
 
-How to create the GCP service account and key (Bash/Cloud Shell)
+Check in GCP IAM and admin → IAM under View by principals for [unique_number] to use in:
+
+* [unique_number]-compute@developer.gserviceaccount.com in the bash command later.
+
+#### How to create the GCP service account and key (Bash/Cloud Shell)
 
 ```bash
 # Set your project (if not already)
@@ -269,7 +273,9 @@ set PROJECT_ID=hospital-etl-project
 gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:${SA_EMAIL}" --role="roles/run.admin"
 gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:${SA_EMAIL}" --role="roles/artifactregistry.writer"
 gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:${SA_EMAIL}" --role="roles/storage.objectViewer"
-
+gcloud iam service-accounts add-iam-policy-binding [unique_number]-compute@developer.gserviceaccount.com \
+  --member="serviceAccount:github-cd-sa@hospital-etl-project.iam.gserviceaccount.com" \
+  --role="roles/iam.serviceAccountUser"
 # Create a JSON key locally (outputs a file named sa-key.json)
 gcloud iam service-accounts keys create sa-key.json \
   --iam-account="${SA_EMAIL}"
