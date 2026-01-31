@@ -212,3 +212,7 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# GitHub Copilot migration artifacts
+copilot.data.migration.edit.xml
+**/copilot.data.migration.edit.xml
