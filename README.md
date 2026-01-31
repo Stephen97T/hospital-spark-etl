@@ -60,6 +60,19 @@ This project follows a **Modular Design** to ensure the code is testable and clo
 
 ---
 
+### Continuous Integration (CI)
+
+Automated CI checks are performed on every push and pull request using GitHub Actions (`.github/workflows/ci.yml`). The
+CI workflow runs:
+
+- **flake8** for linting
+- **mypy** for type checking
+- **pytest** for unit testing
+
+This ensures code quality and correctness before deployment.
+
+---
+
 ## Containerization (Docker)
 
 To solve "environment drift," the entire pipeline is containerized using a multi-layered Dockerfile.
@@ -138,7 +151,7 @@ Once the image is pushed, configure the cloud resources using the Console Interf
     - **Access Control**: Ensure Uniform is selected.
     - **Finalize**: Click `CREATE`.
 
-   ![Create Storage Bucket](images/bucket_creation.png)
+   ![Create Storage Bucket](images/gcp/bucket_creation.png)
 
 3. **Create the Artifact Registry**
     - **Search**: Type `Artifact Registry`.
@@ -148,11 +161,11 @@ Once the image is pushed, configure the cloud resources using the Console Interf
     - **Location Type**: Region → `us-central1`.
     - **Finalize**: Click `CREATE`. (This matches the path used in the docker tag command.)
 
-   ![Create Artifact Registry Repository](images/artifact_repo.png)
+   ![Create Artifact Registry Repository](images/gcp/artifact_repo.png)
 
    After pushing your image to Artifact Registry, you should see it listed:
 
-   ![Artifact Registry Image](images/artifact_image.png)
+   ![Artifact Registry Image](images/gcp/artifact_image.png)
 
 4. **Create and Execute the Cloud Run Job**
     - **Search**: Type `Cloud Run` and click `Jobs` in the left sidebar.
@@ -164,13 +177,13 @@ Once the image is pushed, configure the cloud resources using the Console Interf
         - **Variables**: Add the env variable `GCS_BUCKET_NAME` (bucket name) & ENV_STATE=prod.
     - **Finalize**: Click `CREATE`.
 
-   ![Create Cloud Run Job](images/cloudrun_job.png)
+   ![Create Cloud Run Job](images/gcp/cloudrun_job.png)
 
     - **Run**: Once created, click `EXECUTE` to start the pipeline. You can monitor execution logs:
 
-   ![Cloud Run Logs (Start)](images/cloudrun_logs_1.png)
+   ![Cloud Run Logs (Start)](images/gcp/cloudrun_logs_1.png)
 
-   ![Cloud Run Logs (Completion)](images/cloudrun_logs_2.png)
+   ![Cloud Run Logs (Completion)](images/gcp/cloudrun_logs_2.png)
 
 #### Phase 2: Provisioning Infrastructure (CLI Version)
 
@@ -290,6 +303,28 @@ After adding the variables and secret, your workflow will reference them as:
 - Variables: `${{ vars.GCP_PROJECT_ID }}`, `${{ vars.GCP_REGION }}`, `${{ vars.GCP_REPO_NAME }}`,
   `${{ vars.GCP_IMAGE_NAME }}`, `${{ vars.GCP_BUCKET_NAME }}`, `${{ vars.GCP_JOB_NAME }}`
 - Secret: `${{ secrets.GCP_SA_KEY }}`
+
+---
+
+### Automatic deployment results
+
+The following images showcase the successful execution of the automated deployment pipeline via GitHub Actions (
+`cd.yml`).
+
+- **Image pushed to Artifact Registry:**
+  ![Image Updated](images/deployment/image_updated.png)
+
+- **Cloud Run Job updated with new image:**
+  ![Job Updated](images/deployment/job_updated.png)
+
+- **Job execution started:**
+  ![Job Execute Start](images/deployment/job_execute_start.png)
+
+- **Job execution completed successfully:**
+  ![Job Execute Success](images/deployment/job_execute_success.png)
+
+- **Data in the bucket updated after job run:**
+  ![Bucket Update](images/deployment/bucket_update.png)
 
 ---
 
