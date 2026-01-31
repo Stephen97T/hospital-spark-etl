@@ -1,7 +1,7 @@
 # core
 pyspark==3.5.0
 py4j==0.10.9.7
-setuptools==69.0.3    # CRITICAL for Python 3.12 compatibility
+setuptools==78.1.1
 flask==3.0.2
 google-cloud-storage>=2.14.0
 
@@ -16,17 +16,17 @@ openpyxl==3.1.2
 
 # exploration&notebooks
 ipykernel==6.29.0
-notebook==7.0.0
+notebook==7.2.2
 matplotlib==3.8.0
 seaborn==0.13.0
 ipywidgets>=8.0.0
 
 # quality&testing
-pytest==7.4.3
+pytest==8.3.5
 pytest-spark==0.6.0
 flake8==6.1.0
 mypy==1.6.1
-black==23.10.1
+black==24.3.0
 
 # type stubs
 types-Flask==1.1.6

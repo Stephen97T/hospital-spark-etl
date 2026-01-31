@@ -132,6 +132,8 @@ Once the image is pushed, configure the cloud resources using the Console Interf
     - **Access Control**: Ensure Uniform is selected.
     - **Finalize**: Click `CREATE`.
 
+   ![Create Storage Bucket](images/bucket_creation.png)
+
 2. **Create the Artifact Registry**
     - **Search**: Type `Artifact Registry`.
     - **Create**: Click `[+] CREATE REPOSITORY`.
@@ -139,6 +141,12 @@ Once the image is pushed, configure the cloud resources using the Console Interf
     - **Format**: Docker.
     - **Location Type**: Region → `us-central1`.
     - **Finalize**: Click `CREATE`. (This matches the path used in the docker tag command.)
+
+   ![Create Artifact Registry Repository](images/artifact_repo.png)
+
+   After pushing your image to Artifact Registry, you should see it listed:
+
+   ![Artifact Registry Image](images/artifact_image.png)
 
 3. **Create and Execute the Cloud Run Job**
     - **Search**: Type `Cloud Run` and click `Jobs` in the left sidebar.
@@ -149,7 +157,14 @@ Once the image is pushed, configure the cloud resources using the Console Interf
         - **Capacity**: Set memory to `2 GiB` (required for Spark).
         - **Variables**: Add the env variable `GCS_BUCKET_NAME` (bucket name).
     - **Finalize**: Click `CREATE`.
-    - **Run**: Once created, click `EXECUTE` to start the pipeline.
+
+   ![Create Cloud Run Job](images/cloudrun_job.png)
+
+    - **Run**: Once created, click `EXECUTE` to start the pipeline. You can monitor execution logs:
+
+   ![Cloud Run Logs (Start)](images/cloudrun_logs_1.png)
+
+   ![Cloud Run Logs (Completion)](images/cloudrun_logs_2.png)
 
 #### Phase 2: Provisioning Infrastructure (CLI Version)
 
@@ -208,5 +223,3 @@ Instead of clicking through the UI, run these commands to create your resources.
 * winutils.exe ErrorMissing Hadoop binaries on WindowsSet HADOOP_HOME and add /bin to
   Path.
 * Py4JNetworkErrorPython 3.12+ incompatibilityDowngrade to Python 3.11.401
-
----
