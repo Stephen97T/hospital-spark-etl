@@ -54,3 +54,8 @@ jobs:
             --memory 2Gi \
             --set-env-vars ENV_STATE=prod,GCS_BUCKET_NAME=${{ env.BUCKET_NAME }} \
             --max-retries 0
+
+      - name: Execute Cloud Run Job
+        run: |
+          gcloud run jobs execute ${{ env.JOB_NAME }} \
+            --region ${{ env.REGION }}
