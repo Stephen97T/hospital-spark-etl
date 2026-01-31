@@ -2,7 +2,7 @@ name: Continuous Deployment
 
 on:
   workflow_run:
-    workflows: [ "Python Quality Control" ]
+    workflows: [ "Python-Quality-Control" ]
     types: [ completed ]
     branches: [ main ]
 
