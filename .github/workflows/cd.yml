@@ -2,7 +2,7 @@ name: Continuous Deployment
 
 on:
   workflow_run:
-    workflows: [ "Python-Quality-Control" ]
+    workflows: [ build ]
     types: [ completed ]
     branches: [ main ]
 
@@ -20,9 +20,8 @@ concurrency:
 
 jobs:
   deploy:
-    # Run only if CI succeeded
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: read
       id-token: write
@@ -58,3 +57,8 @@ jobs:
             --memory 2Gi \
             --set-env-vars ENV_STATE=prod,GCS_BUCKET_NAME=${{ env.BUCKET_NAME }} \
             --max-retries 0
+  on-failure:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    steps:
+      - run: echo 'The triggering workflow failed'
