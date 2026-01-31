@@ -1,21 +1,32 @@
 # core
 pyspark==3.5.0
 py4j==0.10.9.7
+setuptools==78.1.1
 flask==3.0.2
 google-cloud-storage>=2.14.0
-numpy==1.26.4
 
 # handle files&data
 kagglehub==0.4.0
+numpy==1.26.4
 pandas==2.1.4
+pytz==2024.1            # Added for Pandas stability
+python-dateutil==2.9.0  # Added for Pandas stability
+six==1.16.0           # Added to fix the dateutil dependency
 openpyxl==3.1.2
 
+# exploration&notebooks
+ipykernel==6.29.0
+notebook==7.2.2
+matplotlib==3.8.0
+seaborn==0.13.0
+ipywidgets>=8.0.0
+
 # quality&testing
-pytest==7.4.3
+pytest==8.3.5
 pytest-spark==0.6.0
 flake8==6.1.0
 mypy==1.6.1
-black==23.10.1
+black==24.3.0
 
 # type stubs
 types-Flask==1.1.6

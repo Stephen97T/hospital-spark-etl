@@ -1,0 +1,23 @@
+# Python cache
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local environments
+.venv/
+venv/
+.env
+.flake8
+
+# Notebooks and Data
+notebooks/
+data/
+images/
+*.csv
+*.parquet
+
+# Git and OS metadata
+.git
+.gitignore
+.DS_Store

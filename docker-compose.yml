@@ -1,0 +1,14 @@
+services:
+  hospital-etl:
+    # Build context and image tagging for Google Cloud
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Format: [REGION]-docker.pkg.dev/[PROJECT_ID]/[REPOSITORY]/[IMAGE_NAME]:[TAG]
+    image: us-central1-docker.pkg.dev/hospital-etl-project/hospital-repo/etl-pipeline:latest
+
+    container_name: hospital_etl_test
+
+    # Mount local data folder to check the output Parquet files on your host machine
+    volumes:
+      - ./data:/app/data
