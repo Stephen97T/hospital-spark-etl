@@ -161,7 +161,7 @@ Once the image is pushed, configure the cloud resources using the Console Interf
     - **Region**: `us-central1`.
     - **Settings** (Expansion Panel):
         - **Capacity**: Set memory to `2 GiB` (required for Spark).
-        - **Variables**: Add the env variable `GCS_BUCKET_NAME` (bucket name).
+        - **Variables**: Add the env variable `GCS_BUCKET_NAME` (bucket name) & ENV_STATE=prod.
     - **Finalize**: Click `CREATE`.
 
    ![Create Cloud Run Job](images/cloudrun_job.png)
@@ -215,7 +215,7 @@ Instead of clicking through the UI, run these commands to create your resources.
        --image us-central1-docker.pkg.dev/[YOUR_PROJECT_ID]/hospital-repo/etl-pipeline:v1 \
        --region us-central1 \
        --memory 2Gi \
-       --set-env-vars GCS_BUCKET_NAME=[YOUR_BUCKET_NAME],KAGGLE_USERNAME=[USER],KAGGLE_KEY=[KEY]
+       --set-env-vars GCS_BUCKET_NAME=[YOUR_BUCKET_NAME],ENV_STATE=prod
 
    # Execute the Job (UI: Click 'Execute')
    gcloud run jobs execute hospital-etl-job --region us-central1
