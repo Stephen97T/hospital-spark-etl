@@ -7,7 +7,9 @@ import main
 
 @patch.object(SparkSession, "stop")
 @patch("main.run_pipeline")
-def test_main_orchestration(mock_run_pipeline, mock_spark_stop) -> None:
+def test_main_orchestration(
+    mock_run_pipeline: MagicMock, mock_spark_stop: MagicMock
+) -> None:
     """Tests that main() correctly initializes Spark and calls run_pipeline
     with the expected environment variables.
     """
@@ -31,7 +33,9 @@ def test_main_orchestration(mock_run_pipeline, mock_spark_stop) -> None:
 
 @patch("pyspark.sql.SparkSession.builder")
 @patch("main.run_pipeline")
-def test_spark_session_creation(mock_run_pipeline, mock_builder):
+def test_spark_session_creation(
+    mock_run_pipeline: MagicMock, mock_builder: MagicMock
+) -> None:
     """Verify that Spark session is configured as requested in main.py"""
     mock_spark = MagicMock()
     # Mock the builder chain
