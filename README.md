@@ -123,7 +123,13 @@ Before touching the Cloud Console, you must authenticate your local machine and 
 
 Once the image is pushed, configure the cloud resources using the Console Interface.
 
-1. **Create the Storage Bucket (The "Gold" Zone)**
+1. **Enable Required APIs**
+   make sure the following APIs are enabled in your project:
+    - Artifact Registry
+    - Cloud Run
+    - Cloud Storage
+
+2. **Create the Storage Bucket (The "Gold" Zone)**
     - **Search**: In the top search bar, type `Buckets` and select Cloud Storage.
     - **Create**: Click `[+] CREATE`.
     - **Name**: Enter a globally unique name (e.g., `hospital-data-gold-123`).
@@ -134,7 +140,7 @@ Once the image is pushed, configure the cloud resources using the Console Interf
 
    ![Create Storage Bucket](images/bucket_creation.png)
 
-2. **Create the Artifact Registry**
+3. **Create the Artifact Registry**
     - **Search**: Type `Artifact Registry`.
     - **Create**: Click `[+] CREATE REPOSITORY`.
     - **Name**: `hospital-repo`.
@@ -148,7 +154,7 @@ Once the image is pushed, configure the cloud resources using the Console Interf
 
    ![Artifact Registry Image](images/artifact_image.png)
 
-3. **Create and Execute the Cloud Run Job**
+4. **Create and Execute the Cloud Run Job**
     - **Search**: Type `Cloud Run` and click `Jobs` in the left sidebar.
     - **Create**: Click `[+] CREATE JOB`.
     - **Container Image URL**: Click `SELECT` and find the image you pushed (`v1`).
@@ -214,6 +220,70 @@ Instead of clicking through the UI, run these commands to create your resources.
    # Execute the Job (UI: Click 'Execute')
    gcloud run jobs execute hospital-etl-job --region us-central1
    ```
+
+---
+
+### GitHub CI/CD configuration: repository variables and secrets
+
+To replicate the deployment pipeline, set up repository Variables (non-sensitive) and a Secret (sensitive) in your
+GitHub repo.
+
+1) Repository Variables (used by `.github/workflows/cd.yml`)
+
+- `GCP_PROJECT_ID`: Your Google Cloud Project ID (e.g., hospital-etl-project)
+- `GCP_REGION`: Deployment region (e.g., us-central1)
+- `GCP_REPO_NAME`: Artifact Registry repository name (e.g., hospital-repo)
+- `GCP_IMAGE_NAME`: Container image name (e.g., etl-pipeline)
+- `GCP_JOB_NAME`: Cloud Run Job name (e.g., hospital-etl-job)
+- `GCP_BUCKET_NAME`: Cloud Storage bucket name (e.g., hospital-data-gold-123)
+
+Where to add variables:
+
+- GitHub → Settings → Secrets and variables → Actions → Variables → New repository variable
+
+2) Repository Secret
+
+- `GCP_SA_KEY`: Google Cloud service account key JSON (paste the full JSON content)
+
+Where to add the secret:
+
+- GitHub → Settings → Secrets and variables → Actions → Secrets → New repository secret
+
+How to create the GCP service account and key (Bash/Cloud Shell)
+
+```bash
+# Set your project (if not already)
+gcloud config set project YOUR_PROJECT_ID
+
+# Create a service account for GitHub CD
+gcloud iam service-accounts create github-cd-sa \
+  --display-name="GitHub CD SA"
+
+# Capture the service account email
+SA_EMAIL="github-cd-sa@YOUR_PROJECT_ID.iam.gserviceaccount.com"
+
+# Set project id
+set PROJECT_ID=hospital-etl-project
+
+# Grant required roles to the service account
+gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:${SA_EMAIL}" --role="roles/run.admin"
+gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:${SA_EMAIL}" --role="roles/artifactregistry.writer"
+gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:${SA_EMAIL}" --role="roles/storage.objectViewer"
+
+# Create a JSON key locally (outputs a file named sa-key.json)
+gcloud iam service-accounts keys create sa-key.json \
+  --iam-account="${SA_EMAIL}"
+
+# Print the key so you can copy it into the GitHub secret
+cat sa-key.json
+# IMPORTANT: Copy the FULL JSON content into the GitHub secret (not just the private_key field)
+```
+
+After adding the variables and secret, your workflow will reference them as:
+
+- Variables: `${{ vars.GCP_PROJECT_ID }}`, `${{ vars.GCP_REGION }}`, `${{ vars.GCP_REPO_NAME }}`,
+  `${{ vars.GCP_IMAGE_NAME }}`, `${{ vars.GCP_BUCKET_NAME }}`, `${{ vars.GCP_JOB_NAME }}`
+- Secret: `${{ secrets.GCP_SA_KEY }}`
 
 ---
 
